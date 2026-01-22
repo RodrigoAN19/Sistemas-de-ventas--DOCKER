@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: ventas_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: sistema_ventas
+      MYSQL_USER: ventas_user
+      MYSQL_PASSWORD: ventas_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ventas_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ventas_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: ventas_user
+      DB_PASSWORD: ventas_pass
+      DB_NAME: sistema_ventas
+      DB_PORT: 3306
+      PORT: 5000
+      SESSION_SECRET: ventas_secret_key_2024
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ventas_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ventas_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - ventas_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  db_data:
+
+networks:
+  ventas_network:
+    driver: bridge
