@@ -7,7 +7,12 @@
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
-  "keywords": ["ventas", "inventario", "nodejs", "express"],
+  "keywords": [
+    "ventas",
+    "inventario",
+    "nodejs",
+    "express"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -16,7 +21,13 @@
     "bcrypt": "^5.1.1",
     "express-session": "^1.17.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "pdfkit": "^0.13.0",
+    "exceljs": "^4.3.0"
+  },
+  "optionalDependencies": {
+    "escpos": "^3.0.0-alpha.6",
+    "escpos-usb": "^3.0.0-alpha.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

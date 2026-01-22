@@ -1,0 +1,85 @@
+/* Estilos para QuantitySelector */
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card-bg);
+    width: fit-content;
+}
+
+.qty-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #4f46e5;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: #4338ca;
+    transform: scale(1.05);
+}
+
+.qty-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.qty-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.qty-input {
+    width: 60px;
+    height: 36px;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    background: var(--card-bg);
+    color: var(--text-color);
+    outline: none;
+}
+
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.qty-input:focus {
+    background: var(--hover-bg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .qty-input {
+        width: 50px;
+        height: 32px;
+        font-size: 14px;
+    }
+}

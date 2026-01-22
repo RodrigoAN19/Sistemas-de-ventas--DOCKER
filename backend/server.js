@@ -48,11 +48,15 @@ const authRoutes = require('./routes/auth');
 const productosRoutes = require('./routes/productos');
 const ventasRoutes = require('./routes/ventas');
 const usuariosRoutes = require('./routes/usuarios');
+const exportarRoutes = require('./routes/exportar');
+const impresionRoutes = require('./routes/impresion');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', isAuthenticated, productosRoutes);
 app.use('/api/ventas', isAuthenticated, ventasRoutes);
 app.use('/api/usuarios', isAuthenticated, isAdmin, usuariosRoutes);
+app.use('/api/exportar', isAuthenticated, exportarRoutes);
+app.use('/api/impresion', isAuthenticated, impresionRoutes);
 
 // Ruta de prueba
 app.get('/api/health', (req, res) => {

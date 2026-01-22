@@ -1,0 +1,106 @@
+/* Estilos para ExportButtons */
+
+.export-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.export-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.export-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pdf-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.pdf-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.excel-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.excel-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.btn-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-text {
+    white-space: nowrap;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .export-buttons {
+        width: 100%;
+    }
+
+    .export-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 16px;
+    }
+
+    .btn-text {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .export-buttons {
+        flex-direction: column;
+    }
+
+    .export-btn {
+        width: 100%;
+    }
+}

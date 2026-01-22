@@ -20,11 +20,13 @@ CREATE TABLE usuarios (
 CREATE TABLE productos (
     id_producto INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    codigo_barra VARCHAR(50) UNIQUE,
     precio DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     estado ENUM('activo', 'inactivo') DEFAULT 'activo',
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_nombre (nombre),
+    INDEX idx_codigo_barra (codigo_barra),
     INDEX idx_estado (estado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -61,18 +63,18 @@ CREATE TABLE detalle_venta (
 INSERT INTO usuarios (nombre, usuario, password, rol) VALUES 
 ('Administrador', 'admin', '$2a$10$CwTycUXWue0Thq9StjUM0uJ8Z0RqYqVqYqVqYqVqYqVqYqVqYqVqY', 'administrador');
 
--- Insertar productos de ejemplo
-INSERT INTO productos (nombre, precio, stock, estado) VALUES
-('Cerveza Pilsen', 3.50, 100, 'activo'),
-('Coca Cola 500ml', 2.50, 150, 'activo'),
-('Inca Kola 500ml', 2.50, 150, 'activo'),
-('Galleta Soda', 1.00, 200, 'activo'),
-('Snack Lays', 2.00, 80, 'activo'),
-('Agua San Luis 625ml', 1.50, 120, 'activo'),
-('Sublime', 1.50, 100, 'activo'),
-('Cigarros Hamilton', 5.00, 50, 'activo'),
-('Chiclets Trident', 0.50, 300, 'activo'),
-('Energizante Red Bull', 6.00, 40, 'activo');
+-- Insertar productos de ejemplo con códigos de barras
+INSERT INTO productos (nombre, codigo_barra, precio, stock, estado) VALUES
+('Cerveza Pilsen 650ml', '7750186002011', 3.50, 100, 'activo'),
+('Coca Cola 500ml', '7411001800019', 2.50, 150, 'activo'),
+('Inca Kola 500ml', '7411001800026', 2.50, 150, 'activo'),
+('Galleta Soda Field', '7751271002714', 1.00, 200, 'activo'),
+('Snack Lays Clásicas', '7750106000116', 2.00, 80, 'activo'),
+('Agua San Luis 625ml', '7751271001014', 1.50, 120, 'activo'),
+('Chocolate Sublime', '7750106000215', 1.50, 100, 'activo'),
+('Cigarros Hamilton', '7750186003011', 5.00, 50, 'activo'),
+('Chiclets Trident', '7750106000314', 0.50, 300, 'activo'),
+('Energizante Red Bull', '9002490100016', 6.00, 40, 'activo');
 
 -- Crear vista para reporte de ventas
 CREATE VIEW vista_ventas AS

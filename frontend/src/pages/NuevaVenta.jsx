@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import BarcodeScanner from '../components/BarcodeScanner';
+import QuantitySelector from '../components/QuantitySelector';
 import './NuevaVenta.css';
 
 const NuevaVenta = () => {
     const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
+    const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [carrito, setCarrito] = useState([]);
     const [selectedProducto, setSelectedProducto] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [cantidad, setCantidad] = useState(1);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -20,9 +25,38 @@ const NuevaVenta = () => {
         try {
             const response = await api.get('/productos');
             setProductos(response.data);
+            setProductosFiltrados(response.data);
         } catch (error) {
             console.error('Error cargando productos:', error);
         }
+    };
+
+    // Búsqueda por texto
+    const handleSearchChange = (e) => {
+        const text = e.target.value;
+        setSearchText(text);
+
+        if (text.trim() === '') {
+            setProductosFiltrados(productos);
+            setShowSuggestions(false);
+            return;
+        }
+
+        // Filtrar productos por nombre
+        const filtrados = productos.filter(p =>
+            p.nombre.toLowerCase().includes(text.toLowerCase()) ||
+            (p.codigo_barra && p.codigo_barra.includes(text))
+        );
+
+        setProductosFiltrados(filtrados);
+        setShowSuggestions(true);
+    };
+
+    // Seleccionar producto desde sugerencias
+    const seleccionarProducto = (producto) => {
+        setSelectedProducto(producto.id_producto.toString());
+        setSearchText(producto.nombre);
+        setShowSuggestions(false);
     };
 
     const agregarAlCarrito = () => {
@@ -102,6 +136,50 @@ const NuevaVenta = () => {
         return carrito.reduce((total, item) => total + (item.precio_unitario * item.cantidad), 0);
     };
 
+    // Buscar producto por código de barras
+    const buscarPorCodigo = async (codigo) => {
+        try {
+            const response = await api.get(`/productos/buscar/${codigo}`);
+            const producto = response.data;
+
+            // Verificar stock
+            if (producto.stock <= 0) {
+                alert(`Producto sin stock: ${producto.nombre}`);
+                return;
+            }
+
+            // Agregar al carrito automáticamente
+            const existeEnCarrito = carrito.find(item => item.id_producto === producto.id_producto);
+
+            if (existeEnCarrito) {
+                const nuevaCantidad = existeEnCarrito.cantidad + 1;
+                if (nuevaCantidad > producto.stock) {
+                    alert(`Stock insuficiente. Disponible: ${producto.stock}`);
+                    return;
+                }
+
+                setCarrito(carrito.map(item =>
+                    item.id_producto === producto.id_producto
+                        ? { ...item, cantidad: nuevaCantidad }
+                        : item
+                ));
+            } else {
+                setCarrito([...carrito, {
+                    id_producto: producto.id_producto,
+                    nombre: producto.nombre,
+                    precio_unitario: producto.precio,
+                    cantidad: 1,
+                    stock: producto.stock
+                }]);
+            }
+
+            console.log(`✅ Producto agregado: ${producto.nombre}`);
+        } catch (error) {
+            console.error('Error buscando producto:', error);
+            alert('Producto no encontrado');
+        }
+    };
+
     const registrarVenta = async () => {
         if (carrito.length === 0) {
             alert('Agrega al menos un producto');
@@ -111,7 +189,18 @@ const NuevaVenta = () => {
         setLoading(true);
 
         try {
-            await api.post('/ventas', { productos: carrito });
+            const response = await api.post('/ventas', { productos: carrito });
+            const ventaId = response.data.venta.id;
+
+            // Intentar imprimir ticket automáticamente
+            try {
+                await api.post(`/impresion/ticket/${ventaId}`);
+                console.log('✅ Ticket impreso');
+            } catch (printError) {
+                console.warn('⚠️ No se pudo imprimir el ticket:', printError);
+                // No bloqueamos la venta si falla la impresión
+            }
+
             setSuccess(true);
 
             setTimeout(() => {
@@ -152,11 +241,81 @@ const NuevaVenta = () => {
                 <div className="card">
                     <h2 className="mb-3">Agregar Productos</h2>
 
+                    {/* Método 1: Lector de códigos de barras */}
                     <div className="input-group">
-                        <label>Producto</label>
+                        <label>🔍 Método 1: Escanear Código de Barras</label>
+                        <BarcodeScanner onScan={buscarPorCodigo} />
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                            Escanea el código de barras del producto
+                        </p>
+                    </div>
+
+                    <div style={{ margin: '20px 0', borderTop: '1px solid var(--border-color)' }}></div>
+
+                    {/* Método 2: Búsqueda por texto con autocompletado */}
+                    <div className="input-group" style={{ position: 'relative' }}>
+                        <label>⌨️ Método 2: Buscar escribiendo</label>
+                        <input
+                            type="text"
+                            value={searchText}
+                            onChange={handleSearchChange}
+                            onFocus={() => searchText && setShowSuggestions(true)}
+                            placeholder="Escribe el nombre del producto..."
+                            autoComplete="off"
+                        />
+
+                        {/* Sugerencias de autocompletado */}
+                        {showSuggestions && productosFiltrados.length > 0 && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                backgroundColor: 'var(--bg-secondary)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                                zIndex: 1000,
+                                marginTop: '4px',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}>
+                                {productosFiltrados.map(producto => (
+                                    <div
+                                        key={producto.id_producto}
+                                        onClick={() => seleccionarProducto(producto)}
+                                        style={{
+                                            padding: '12px',
+                                            cursor: 'pointer',
+                                            borderBottom: '1px solid var(--border-color)',
+                                            transition: 'background 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                    >
+                                        <div style={{ fontWeight: 'bold' }}>{producto.nombre}</div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                            S/ {parseFloat(producto.precio).toFixed(2)} - Stock: {producto.stock}
+                                            {producto.codigo_barra && ` - Código: ${producto.codigo_barra}`}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ margin: '20px 0', borderTop: '1px solid var(--border-color)' }}></div>
+
+                    {/* Método 3: Selección desde lista */}
+                    <div className="input-group">
+                        <label>📋 Método 3: Seleccionar de la lista</label>
                         <select
                             value={selectedProducto}
-                            onChange={(e) => setSelectedProducto(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedProducto(e.target.value);
+                                const prod = productos.find(p => p.id_producto === parseInt(e.target.value));
+                                if (prod) setSearchText(prod.nombre);
+                            }}
                         >
                             <option value="">Selecciona un producto</option>
                             {productos.map(producto => (
@@ -169,11 +328,12 @@ const NuevaVenta = () => {
 
                     <div className="input-group">
                         <label>Cantidad</label>
-                        <input
-                            type="number"
-                            min="1"
+                        <QuantitySelector
                             value={cantidad}
-                            onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
+                            onChange={setCantidad}
+                            min={1}
+                            max={999}
+                            stock={selectedProducto ? productos.find(p => p.id_producto === parseInt(selectedProducto))?.stock || 999 : 999}
                         />
                     </div>
 

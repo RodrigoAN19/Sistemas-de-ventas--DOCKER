@@ -15,6 +15,27 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Buscar producto por código de barras
+router.get('/buscar/:codigo', async (req, res) => {
+    try {
+        const { codigo } = req.params;
+
+        const [productos] = await db.query(
+            'SELECT * FROM productos WHERE codigo_barra = ? AND estado = "activo"',
+            [codigo]
+        );
+
+        if (productos.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        res.json(productos[0]);
+    } catch (error) {
+        console.error('Error buscando producto:', error);
+        res.status(500).json({ error: 'Error al buscar producto' });
+    }
+});
+
 // Obtener todos los productos (incluye inactivos) - Solo admin
 router.get('/todos', async (req, res) => {
     try {
@@ -39,15 +60,27 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ error: 'Acceso denegado' });
         }
 
-        const { nombre, precio, stock } = req.body;
+        const { nombre, codigo_barra, precio, stock } = req.body;
 
         if (!nombre || !precio || stock === undefined) {
             return res.status(400).json({ error: 'Todos los campos son requeridos' });
         }
 
+        // Validar que el código de barras sea único si se proporciona
+        if (codigo_barra) {
+            const [existing] = await db.query(
+                'SELECT id_producto FROM productos WHERE codigo_barra = ?',
+                [codigo_barra]
+            );
+
+            if (existing.length > 0) {
+                return res.status(400).json({ error: 'El código de barras ya existe' });
+            }
+        }
+
         const [result] = await db.query(
-            'INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)',
-            [nombre, precio, stock]
+            'INSERT INTO productos (nombre, codigo_barra, precio, stock) VALUES (?, ?, ?, ?)',
+            [nombre, codigo_barra || null, precio, stock]
         );
 
         res.status(201).json({
@@ -69,11 +102,23 @@ router.put('/:id', async (req, res) => {
         }
 
         const { id } = req.params;
-        const { nombre, precio, stock, estado } = req.body;
+        const { nombre, codigo_barra, precio, stock, estado } = req.body;
+
+        // Validar que el código de barras sea único si se proporciona
+        if (codigo_barra) {
+            const [existing] = await db.query(
+                'SELECT id_producto FROM productos WHERE codigo_barra = ? AND id_producto != ?',
+                [codigo_barra, id]
+            );
+
+            if (existing.length > 0) {
+                return res.status(400).json({ error: 'El código de barras ya existe' });
+            }
+        }
 
         await db.query(
-            'UPDATE productos SET nombre = ?, precio = ?, stock = ?, estado = ? WHERE id_producto = ?',
-            [nombre, precio, stock, estado, id]
+            'UPDATE productos SET nombre = ?, codigo_barra = ?, precio = ?, stock = ?, estado = ? WHERE id_producto = ?',
+            [nombre, codigo_barra || null, precio, stock, estado, id]
         );
 
         res.json({ message: 'Producto actualizado exitosamente' });

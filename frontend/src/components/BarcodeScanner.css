@@ -1,0 +1,158 @@
+/* Estilos para BarcodeScanner */
+
+.barcode-scanner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.barcode-scanner:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.scanner-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+}
+
+.scanning-animation {
+    animation: pulse-icon 1s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+.scanner-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color);
+    outline: none;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.scanner-input::placeholder {
+    color: var(--text-secondary);
+    font-family: inherit;
+    letter-spacing: normal;
+}
+
+.scanner-input.scanning {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.scanning-indicator {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.5);
+    }
+}
+
+/* Efecto de escaneo */
+.barcode-scanner.scanning {
+    background: linear-gradient(90deg,
+            var(--card-bg) 0%,
+            rgba(59, 130, 246, 0.1) 50%,
+            var(--card-bg) 100%);
+    background-size: 200% 100%;
+    animation: scanning 1.5s linear infinite;
+}
+
+@keyframes scanning {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .barcode-scanner {
+        padding: 10px 14px;
+    }
+
+    .scanner-icon {
+        font-size: 20px;
+        min-width: 24px;
+    }
+
+    .scanner-input {
+        font-size: 14px;
+    }
+
+    .scanning-indicator {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+}

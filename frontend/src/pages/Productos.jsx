@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import ExportButtons from '../components/ExportButtons';
 
 const Productos = () => {
     const { isAdmin } = useAuth();
@@ -12,6 +13,7 @@ const Productos = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({
         nombre: '',
+        codigo_barra: '',
         precio: '',
         stock: '',
         estado: 'activo'
@@ -59,6 +61,7 @@ const Productos = () => {
         setEditingProduct(producto);
         setFormData({
             nombre: producto.nombre,
+            codigo_barra: producto.codigo_barra || '',
             precio: producto.precio,
             stock: producto.stock,
             estado: producto.estado
@@ -78,7 +81,7 @@ const Productos = () => {
     };
 
     const resetForm = () => {
-        setFormData({ nombre: '', precio: '', stock: '', estado: 'activo' });
+        setFormData({ nombre: '', codigo_barra: '', precio: '', stock: '', estado: 'activo' });
         setEditingProduct(null);
     };
 
@@ -90,15 +93,18 @@ const Productos = () => {
         <div>
             <div className="flex-between mb-3">
                 <h1>📦 Productos</h1>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => {
-                        resetForm();
-                        setShowModal(true);
-                    }}
-                >
-                    ➕ Nuevo Producto
-                </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <ExportButtons tipo="productos" />
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                            resetForm();
+                            setShowModal(true);
+                        }}
+                    >
+                        ➕ Nuevo Producto
+                    </button>
+                </div>
             </div>
 
             <div className="card">
@@ -108,6 +114,7 @@ const Productos = () => {
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>Código Barras</th>
                                 <th>Precio</th>
                                 <th>Stock</th>
                                 <th>Estado</th>
@@ -119,6 +126,11 @@ const Productos = () => {
                                 <tr key={producto.id_producto}>
                                     <td>{producto.id_producto}</td>
                                     <td>{producto.nombre}</td>
+                                    <td>
+                                        <code style={{ fontSize: '12px', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
+                                            {producto.codigo_barra || 'N/A'}
+                                        </code>
+                                    </td>
                                     <td>S/ {parseFloat(producto.precio).toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${producto.stock > 10 ? 'badge-success' : producto.stock > 0 ? 'badge-primary' : 'badge-danger'}`}>
@@ -171,6 +183,19 @@ const Productos = () => {
                                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                                     required
                                 />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Código de Barras (opcional)</label>
+                                <input
+                                    type="text"
+                                    value={formData.codigo_barra}
+                                    onChange={(e) => setFormData({ ...formData, codigo_barra: e.target.value })}
+                                    placeholder="Ej: 7750186002011"
+                                />
+                                <small style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                    Deja vacío para generar automáticamente
+                                </small>
                             </div>
 
                             <div className="input-group">

@@ -1,15 +1,28 @@
-# Sistema de Ventas e Inventario
+# Sistema POS - Licorería Cueva 🍺
 
-Sistema web completo de ventas e inventario desarrollado con React, Node.js, MySQL y Docker.
+Sistema web completo de ventas e inventario (Point of Sale) desarrollado con React, Node.js, MySQL y Docker.
 
-## 🚀 Características
+## 🚀 Características Principales
 
+### Funcionalidades Base
 - ✅ Registro de ventas con múltiples productos
 - ✅ Control de inventario automático
 - ✅ Gestión de usuarios por roles (Administrador/Vendedor)
 - ✅ Modo claro y oscuro
 - ✅ Sistema de sesiones (sin JWT)
 - ✅ Completamente dockerizado
+
+### ✨ Nuevas Funcionalidades POS (v2.0)
+- ✅ **Código de barras** en productos
+- ✅ **Lector de códigos de barras** (3nStar SC050 USB)
+- ✅ **Impresora térmica** (3nStar RPT008 - 80mm)
+- ✅ **Filtro por fecha** con resumen diario
+- ✅ **Editar y eliminar ventas** (solo administrador)
+- ✅ **Reimprimir tickets**
+- ✅ **Exportación a PDF** (ventas, productos, dashboard)
+- ✅ **Exportación a Excel** (ventas y productos)
+- ✅ **Búsqueda por código de barras**
+- ✅ **Selector de cantidad** con botones +/-
 
 ## 📋 Requisitos
 
